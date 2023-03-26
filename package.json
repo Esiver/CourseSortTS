@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "requirejs": "^2.3.6"
+  }
+}

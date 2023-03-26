@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>var exports = {};</script>
+    
+</head>
+<body>
+    <h1>Courses</h1>
+    <ul class="course__list" id="course-list"></ul>
+    <h1>Teacher</h1>
+    <ul id="teacher-list" class="teacher__overview"></ul>
+    
+</body>
+<script src="index.js"></script>
+
+</html>
+
+<style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    p {margin: 0; padding: 0;}
+    .course__list {list-style-type: none; display: flex; flex-wrap: wrap;}
+    .course__item {border: 1px solid; flex: 1; margin: 8px; padding: 0 8px; min-width: 200px; background-color: rgba(0, 255, 255, 0.233);}
+    .course__wrapper {}
+    .course__name {font-weight: 800;}
+    .course__teachers {background-color: rgba(137, 43, 226, 0.322); padding: 10px;}
+
+    .teacher__overview {padding-left: 1.5em; list-style: none; display: flex; flex-direction: row; flex-wrap: wrap;}
+    .teacher__appointed-course {border: 1px solid azure;}
+    .teacher__list {padding-left: 1.5em;}
+    .teacher__item { background-color: rgba(0, 255, 255, 0.233); padding: 0 10px; margin: 10px; border: 1px solid black; max-width: 200px;}
+</style>
+
+
+<!-- todo -->
+<!-- 0) mere info i DOM -->
+<!-- 1) put prioritet på kurserne -->

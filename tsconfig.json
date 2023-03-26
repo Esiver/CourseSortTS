@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "baseUrl": "src/",
+        "strictNullChecks": true,
+        "lib": [
+            "dom",
+            "es7"
+          ]
+         
+        
+    },
+    
+    "files": [
+        "index.ts",
+        
+
+    ]
+  }
