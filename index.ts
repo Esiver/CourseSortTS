@@ -16,7 +16,7 @@ function checkMatchingTimeslotValues(array1:Timeslot[], array2:Timeslot[]){
           }
         }
       }
-      return false; // no match found
+      return false; // no match foud
 }
 
 function hasMatchingCompetenceValues(competenceArray1:Competence[], competenceArray2:Competence[]){
@@ -332,22 +332,26 @@ function assignCourseArrayTeachers(courseArray:Course[]):Course[] {
     let assignedCourseArray:Course[] = [...courseArray]; // actually should be called "toBeAssignedCourseArray", hehe
     
     assignedCourseArray.forEach(course=> {
-        
-
         //*
         course.competentTeachers.forEach(competentTeacher => { // we try and match each potential teacher with the course
             let teacherToAppoint:Teacher = competentTeacher//course.competentTeachers[attemptIndex];
             let letMatch:boolean = false;
+            console.log(0)
 
             if(typeof teacherToAppoint != 'undefined' && teacherToAppoint){
+                console.log(1)
+
                // Check if teachers timeslot for the course is free?
                 if(course.appointedTeacherArray.length < course.requiredTeacherCount){
                     
                     teacherToAppoint.timeSlotArray.forEach(teacherTimeslot => {
+                        console.log(2, teacherTimeslot)
+
                         // we try to assign each timeslot if possible
                         // but each timeslot can only be assigned to one course!
                         if (!teacherTimeslot.course){
                             // we check if the timeslot matches with one of the course's timeslot
+                            console.log(3)
                             course.timeSlotArray.forEach(courseTimeslot => {
                                 if(teacherTimeslot.startHour == courseTimeslot.startHour && teacherTimeslot.endHour == courseTimeslot.endHour){
                                     // now we can appoint the course to the teacher's timeslot
@@ -387,9 +391,9 @@ function assignCourseArrayTeachers(courseArray:Course[]):Course[] {
         if(typeof course.appointedTeacherArray == 'undefined' || course.appointedTeacherArray.length == 0){
             let attempts = 2;
             for (let attemptIndex = 0; attemptIndex < attempts; attemptIndex++) {
-             //*
+                //*
 
-          //*      
+                //*      
             }
 
             // teacherToAppoint.appointedCourse = course;
