@@ -24,7 +24,7 @@ function hasMatchingCompetenceValues(competenceArray1:Competence[], competenceAr
   const isEqual = competenceArray1.every(val1 => competenceArray2.some(val2 => JSON.stringify(val1) === JSON.stringify(val2)));
   // Log a message if arr2 doesn't contain the same values as arr1
   if (!isEqual) {
-    console.log("arr2 does not contain the same values as arr1");
+    // console.log("arr2 does not contain the same values as arr1");
     return false
   }
   else {
@@ -173,20 +173,39 @@ function generateCourseArray(amount:number, competenceArray:Competence[], timesl
 
 
 //sorting
-function getQualifiedTeachers(course:Course, teacherArray:Teacher[]){
-    let qualifiedTeachersArray:Teacher[] = [];
-    let requiredCompetenceArray:Competence[] = course.competenceArray;
-    
-    teacherArray.forEach(teacher => {
-        // For each teacher, we check if they're qualigfied
-        if (requiredCompetenceArray.every((obj:Competence, index:number) => obj?.label == teacher.competenceArray[index]?.label)){
-            qualifiedTeachersArray.push(teacher);
-        } else {
-            // console.log("teacher", teacher, "did not has to required competences");
-        }
-        
-    });
+function getQualifiedTeachers(course: Course, teacherArray: Teacher[]): Teacher[] {
+    // let qualifiedTeachersArray: Teacher[] = [];
+    let requiredCompetenceArray: Competence[] = course.competenceArray;
 
+    const qualifiedTeachersArray = teacherArray.filter((teacher) =>
+        requiredCompetenceArray.every((requiredCompetence) =>
+            teacher.competenceArray.some(
+                (teacherCompetence) =>
+                    teacherCompetence.label === requiredCompetence.label
+            )
+        )
+    );
+    const unqualifiedTeachers = teacherArray.filter(
+        (teacher) => !qualifiedTeachersArray.includes(teacher)
+    );
+    // teacherArray.forEach(teacher => {
+    //     // For each teacher, we check if they're qualigfied for all competences in given course
+
+    //     if (requiredCompetenceArray.every((obj:Competence, index:number) => obj.label == teacher.competenceArray[index].label)){
+    //         qualifiedTeachersArray.push(teacher);
+    //     } else {
+    //         console.log("teacher", teacher, "did not has to required competences for course", course);
+    //     }
+
+    // unqualifiedTeachers.forEach((teacher) => {
+    //     console.log(
+    //         `Teacher ${teacher.name} does not have all the required competences for course ${course.name}: ${qualifiedTeachersArray}`
+    //     );
+    // });
+
+    // });
+    // console.log("required competences: ", qualifiedTeachersArray)
+    
     return qualifiedTeachersArray;
 }
 
@@ -204,7 +223,7 @@ function getTimeAvailableTeachers(course:Course, teacherArr:Teacher[]){
     return timeAvailableTeachersArray
 }
 
-function getNearbyTeachers(course:Course, teacherArray:Teacher[], distThreshold =1):Teacher[]{
+function getNearbyTeachers(course:Course, teacherArray:Teacher[], distThreshold =250):Teacher[]{
     let nearbyTeachersArray:Teacher[] = [];
 
     teacherArray.forEach(teacher=> {
@@ -217,14 +236,18 @@ function getNearbyTeachers(course:Course, teacherArray:Teacher[], distThreshold 
 
     return nearbyTeachersArray;
 }
+
 function checkPotentialCourses(courseArray:Course[], teacherArray:Teacher[]){
     //checks if competent teachers, timeavailable teachers, as well as nearby teachers.
-    let potentialCourseArray:Course[] = [...courseArray]; // all courses
+    let potentialCourseArray:Course[] = courseArray; // all courses
+
     potentialCourseArray.forEach(course => {
-        course.competentTeachers = getQualifiedTeachers(course, teacherArray);
+        let competentTeachers = getQualifiedTeachers(course, teacherArray)
+        course.competentTeachers = competentTeachers;
         course.timeAvailableTeachers = getTimeAvailableTeachers(course, teacherArray);
         course.nearbyTeachers = getNearbyTeachers(course, teacherArray);
     });
+
     return potentialCourseArray;
 };
 
@@ -330,46 +353,56 @@ function sortCourseArrayTeachersDistance(courseArray:Course[]):Course[]{
 }
 function assignCourseArrayTeachers(courseArray:Course[]):Course[] {
     let assignedCourseArray:Course[] = [...courseArray]; // actually should be called "toBeAssignedCourseArray", hehe
-    
+
+
     assignedCourseArray.forEach(course=> {
-        //*
+        // *    
         course.competentTeachers.forEach(competentTeacher => { // we try and match each potential teacher with the course
             let teacherToAppoint:Teacher = competentTeacher//course.competentTeachers[attemptIndex];
             let letMatch:boolean = false;
             console.log(0)
-
             if(typeof teacherToAppoint != 'undefined' && teacherToAppoint){
                 console.log(1)
-
+                
                // Check if teachers timeslot for the course is free?
                 if(course.appointedTeacherArray.length < course.requiredTeacherCount){
-                    
+                    console.log("there is still required more teachers for", course)
+
                     teacherToAppoint.timeSlotArray.forEach(teacherTimeslot => {
-                        console.log(2, teacherTimeslot)
+                        console.log("__ check teacjerTimeslot:", teacherTimeslot)
 
                         // we try to assign each timeslot if possible
                         // but each timeslot can only be assigned to one course!
-                        if (!teacherTimeslot.course){
-                            // we check if the timeslot matches with one of the course's timeslot
-                            console.log(3)
-                            course.timeSlotArray.forEach(courseTimeslot => {
-                                if(teacherTimeslot.startHour == courseTimeslot.startHour && teacherTimeslot.endHour == courseTimeslot.endHour){
-                                    // now we can appoint the course to the teacher's timeslot
-                                    teacherTimeslot.course = course;
-                                    console.log("push?")
-                                    letMatch = true;
+                        // if (!teacherTimeslot.course){
+                            console.log("HEJ HEJ")
 
+                            // we check if the teachers' timeslot object already has been given/assigned a course
+                            if(typeof teacherTimeslot.course == 'undefined'){
+                                console.log("teachers' timeslot not assigned a course...")
+                            // we check if the timeslot matches with one of the course's timeslot
+                            course.timeSlotArray.forEach(courseTimeslot => {
+                                console.log("__ check courseTimeslot:", courseTimeslot)
+                                if(teacherTimeslot.startHour == courseTimeslot.startHour && teacherTimeslot.endHour == courseTimeslot.endHour){
+                                    console.log("teachers' timeslot and course's timeslot match!" )
+                                    if (course.requiredTeacherCount > course.appointedTeacherArray.length){ // 
+
+                                    // now we can appoint the course to the teacher's timeslot
+                                        teacherTimeslot.course = course;
+                                        letMatch = true;
+                                    }
                                 }
                             })
-                        }
+                            }
+                        // if (course.requiredTeacherCount > course.appointedTeacherArray.length){
+
+                            
+                        // }
                     })
     
                     // then we push all 
                     teacherToAppoint.timeSlotArray.forEach(teacherTimeslot => {
                         if (teacherTimeslot.course){
                             if (teacherTimeslot.course == course && letMatch){
-                                console.log("push !!")
-
                                 teacherToAppoint.appointedCourse.push(course);
                                 course.appointedTeacherArray.push(teacherToAppoint);
                             }
@@ -377,16 +410,13 @@ function assignCourseArrayTeachers(courseArray:Course[]):Course[] {
                     })
                     
                 }
-                console.log("...",course.name, " - ", competentTeacher.name, course, competentTeacher)
+                // console.log("...",course.name, " - ", competentTeacher.name, course, competentTeacher)
 
             }
         })
-
-        
         
 
         //*
-
 
         if(typeof course.appointedTeacherArray == 'undefined' || course.appointedTeacherArray.length == 0){
             let attempts = 2;
@@ -401,7 +431,7 @@ function assignCourseArrayTeachers(courseArray:Course[]):Course[] {
             // appoint a teacher to the course!
         }
     })
-
+    console.log("assignedCourseArray",assignedCourseArray)
     return assignedCourseArray;
 }
 
@@ -414,14 +444,20 @@ let courseArray:Course[]= generateCourseArray(20, competenceArray, timeslotArray
 
 // 1) For each course, create a list of all available teachers who meet the qualifications for that course.
 let potentialCourseArray:Course[] = checkPotentialCourses(courseArray, teacherArray);
-
+console.log("potentialCourseArray", console.table(potentialCourseArray))
 // 2) Sort the list of teachers for each course based on their availability during the course schedule.
 // altså hvis the givne kursus' potentielle underviseres tidsplan kan passe ind i kursets tidsplan.
 // // 2.5) sort according to distance
 // let sortedTeacherDistancePotentialCourseArray:Course[] = sortCourseArrayTeachersDistance(sortedTeacherTimeAvailabilityPotentialCourseArray);
-let sortedTeacherCourseArray:Course[] = sortCourseArrayTeachersDistance(sortCourseArrayTeachersTime(potentialCourseArray))
+
+// * REMEMBER TO SORT! **// let sortedTeacherCourseArray:Course[] = sortCourseArrayTeachersDistance(sortCourseArrayTeachersTime(potentialCourseArray))
+let sortedTeacherCourseArray:Course[] = sortCourseArrayTeachersDistance(potentialCourseArray);
+
+console.log("sortedTEacherCourseArray", sortedTeacherCourseArray)
+
 // 3) If multiple teachers are equally available, choose the teacher who lives closest to the course location.
 let assignedCourseArray:Course[] = assignCourseArrayTeachers(sortedTeacherCourseArray);
+
 
 
 
