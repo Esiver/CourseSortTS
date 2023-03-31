@@ -28,7 +28,6 @@ function checkMatchingTimeslotValues(array1, array2) {
 function hasMatchingCompetenceValues(competenceArray1, competenceArray2) {
     var isEqual = competenceArray1.every(function (val1) { return competenceArray2.some(function (val2) { return JSON.stringify(val1) === JSON.stringify(val2); }); });
     if (!isEqual) {
-        console.log("arr2 does not contain the same values as arr1");
         return false;
     }
     else {
@@ -117,15 +116,15 @@ function generateCourseArray(amount, competenceArray, timeslotArray) {
     return courseArray;
 }
 function getQualifiedTeachers(course, teacherArray) {
-    var qualifiedTeachersArray = [];
     var requiredCompetenceArray = course.competenceArray;
-    teacherArray.forEach(function (teacher) {
-        if (requiredCompetenceArray.every(function (obj, index) { var _a; return (obj === null || obj === void 0 ? void 0 : obj.label) == ((_a = teacher.competenceArray[index]) === null || _a === void 0 ? void 0 : _a.label); })) {
-            qualifiedTeachersArray.push(teacher);
-        }
-        else {
-        }
+    var qualifiedTeachersArray = teacherArray.filter(function (teacher) {
+        return requiredCompetenceArray.every(function (requiredCompetence) {
+            return teacher.competenceArray.some(function (teacherCompetence) {
+                return teacherCompetence.label === requiredCompetence.label;
+            });
+        });
     });
+    var unqualifiedTeachers = teacherArray.filter(function (teacher) { return !qualifiedTeachersArray.includes(teacher); });
     return qualifiedTeachersArray;
 }
 function getTimeAvailableTeachers(course, teacherArr) {
@@ -140,7 +139,7 @@ function getTimeAvailableTeachers(course, teacherArr) {
     return timeAvailableTeachersArray;
 }
 function getNearbyTeachers(course, teacherArray, distThreshold) {
-    if (distThreshold === void 0) { distThreshold = 1; }
+    if (distThreshold === void 0) { distThreshold = 250; }
     var nearbyTeachersArray = [];
     teacherArray.forEach(function (teacher) {
         var absoluteDist = getTeacherCourseDistance(teacher, course);
@@ -152,9 +151,10 @@ function getNearbyTeachers(course, teacherArray, distThreshold) {
     return nearbyTeachersArray;
 }
 function checkPotentialCourses(courseArray, teacherArray) {
-    var potentialCourseArray = __spreadArray([], courseArray, true);
+    var potentialCourseArray = courseArray;
     potentialCourseArray.forEach(function (course) {
-        course.competentTeachers = getQualifiedTeachers(course, teacherArray);
+        var competentTeachers = getQualifiedTeachers(course, teacherArray);
+        course.competentTeachers = competentTeachers;
         course.timeAvailableTeachers = getTimeAvailableTeachers(course, teacherArray);
         course.nearbyTeachers = getNearbyTeachers(course, teacherArray);
     });
@@ -256,15 +256,24 @@ function assignCourseArrayTeachers(courseArray) {
         course.competentTeachers.forEach(function (competentTeacher) {
             var teacherToAppoint = competentTeacher;
             var letMatch = false;
+            console.log(0);
             if (typeof teacherToAppoint != 'undefined' && teacherToAppoint) {
+                console.log(1);
                 if (course.appointedTeacherArray.length < course.requiredTeacherCount) {
+                    console.log("there is still required more teachers for", course);
                     teacherToAppoint.timeSlotArray.forEach(function (teacherTimeslot) {
-                        if (!teacherTimeslot.course) {
+                        console.log("__ check teacjerTimeslot:", teacherTimeslot);
+                        console.log("HEJ HEJ");
+                        if (typeof teacherTimeslot.course == 'undefined') {
+                            console.log("teachers' timeslot not assigned a course...");
                             course.timeSlotArray.forEach(function (courseTimeslot) {
+                                console.log("__ check courseTimeslot:", courseTimeslot);
                                 if (teacherTimeslot.startHour == courseTimeslot.startHour && teacherTimeslot.endHour == courseTimeslot.endHour) {
-                                    teacherTimeslot.course = course;
-                                    console.log("push?");
-                                    letMatch = true;
+                                    console.log("teachers' timeslot and course's timeslot match!");
+                                    if (course.requiredTeacherCount > course.appointedTeacherArray.length) {
+                                        teacherTimeslot.course = course;
+                                        letMatch = true;
+                                    }
                                 }
                             });
                         }
@@ -272,14 +281,12 @@ function assignCourseArrayTeachers(courseArray) {
                     teacherToAppoint.timeSlotArray.forEach(function (teacherTimeslot) {
                         if (teacherTimeslot.course) {
                             if (teacherTimeslot.course == course && letMatch) {
-                                console.log("push !!");
                                 teacherToAppoint.appointedCourse.push(course);
                                 course.appointedTeacherArray.push(teacherToAppoint);
                             }
                         }
                     });
                 }
-                console.log("...", course.name, " - ", competentTeacher.name, course, competentTeacher);
             }
         });
         if (typeof course.appointedTeacherArray == 'undefined' || course.appointedTeacherArray.length == 0) {
@@ -288,15 +295,18 @@ function assignCourseArrayTeachers(courseArray) {
             }
         }
     });
+    console.log("assignedCourseArray", assignedCourseArray);
     return assignedCourseArray;
 }
 var competenceArray = [{ label: "Math" }, { label: "Prince-2" }, { label: "Queen-1" }];
-var timeslotArray = [{ startHour: 0830, endHour: 1000 }, { startHour: 1030, endHour: 1200 }, { startHour: 1300, endHour: 1430 }, { startHour: 1500, endHour: 1600 }, { startHour: 2000, endHour: 2100 }];
+var timeslotArray = [{ startHour: 0830, endHour: 1000 }, { startHour: 1030, endHour: 1200 }];
 var teacherCourseFitMatrix;
 var teacherArray = generateTeacherArray(10, competenceArray, timeslotArray);
 var courseArray = generateCourseArray(20, competenceArray, timeslotArray);
 var potentialCourseArray = checkPotentialCourses(courseArray, teacherArray);
-var sortedTeacherCourseArray = sortCourseArrayTeachersDistance(sortCourseArrayTeachersTime(potentialCourseArray));
+console.log("potentialCourseArray", console.table(potentialCourseArray));
+var sortedTeacherCourseArray = sortCourseArrayTeachersDistance(potentialCourseArray);
+console.log("sortedTEacherCourseArray", sortedTeacherCourseArray);
 var assignedCourseArray = assignCourseArrayTeachers(sortedTeacherCourseArray);
 function courseArrayRenderHtml(courseArray, containerSelector) {
     if (containerSelector === void 0) { containerSelector = "#course-list"; }

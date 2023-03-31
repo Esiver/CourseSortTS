@@ -65,7 +65,7 @@ class Course {
     competenceArray: Competence[];
     timeSlotArray : Timeslot[];
     location : number;
-    competentTeachers: Teacher[] = [];
+    competentTeachers:Teacher[] = [];
     nearbyTeachers : Teacher[] = [];
     timeAvailableTeachers : Teacher[] = [];
     appointedTeacherArray:Teacher[] = [];
@@ -437,13 +437,14 @@ function assignCourseArrayTeachers(courseArray:Course[]):Course[] {
 
 // ---- begin / setup
 let competenceArray:Competence[] = [{label: "Math"}, {label: "Prince-2"}, {label: "Queen-1"}];
-let timeslotArray:Timeslot[] = [{startHour: 0830, endHour: 1000}, {startHour: 1030, endHour: 1200}, {startHour: 1300, endHour: 1430}, {startHour:1500, endHour: 1600}, {startHour:2000, endHour: 2100}] // fix hours do date...
+let timeslotArray:Timeslot[] = [{startHour: 0830, endHour: 1000}, {startHour: 1030, endHour: 1200}]//, {startHour: 1300, endHour: 1430}, {startHour:1500, endHour: 1600}, {startHour:2000, endHour: 2100}] // fix hours do date...
 let teacherCourseFitMatrix;
 let teacherArray:Teacher[] = generateTeacherArray(10, competenceArray, timeslotArray);
 let courseArray:Course[]= generateCourseArray(20, competenceArray, timeslotArray);
 
 // 1) For each course, create a list of all available teachers who meet the qualifications for that course.
-let potentialCourseArray:Course[] = checkPotentialCourses(courseArray, teacherArray);
+let potentialCourseArray:Course[] = checkPotentialCourses(courseArray, teacherArray); // '''
+
 console.log("potentialCourseArray", console.table(potentialCourseArray))
 // 2) Sort the list of teachers for each course based on their availability during the course schedule.
 // altså hvis the givne kursus' potentielle underviseres tidsplan kan passe ind i kursets tidsplan.
